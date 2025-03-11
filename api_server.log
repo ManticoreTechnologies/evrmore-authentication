@@ -1,0 +1,22 @@
+2025-03-10 17:58:56,164 - evrmore_authentication - INFO - Initializing database...
+2025-03-10 17:58:56,215 - evrmore_authentication - INFO - Database initialization complete
+2025-03-10 17:58:56,215 - evrmore_authentication - INFO - Starting Evrmore Authentication API server on 0.0.0.0:8000
+2025-03-10 17:58:56,219 - evrmore_authentication.auth - INFO - Successfully connected to Evrmore node
+INFO:     Started server process [1202861]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:55830 - "POST /challenge HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53494 - "POST /authenticate HTTP/1.1" 200 OK
+Using JWT secret: evrmo...
+Token data: {'sub': 'ec9c2785-6787-44bf-a397-66eab339d567', 'addr': 'EaRJxZBkVFbqSkfxUQ4LPdb2BqKG13GGKN', 'exp': 1741660159, 'iat': 1741658359, 'jti': 'db9e47c1-fa83-450a-873d-aaa01c0ee197'}
+INFO:     127.0.0.1:47310 - "GET /validate?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlYzljMjc4NS02Nzg3LTQ0YmYtYTM5Ny02NmVhYjMzOWQ1NjciLCJhZGRyIjoiRWFSSnhaQmtWRmJxU2tmeFVRNExQZGIyQnFLRzEzR0dLTiIsImV4cCI6MTc0MTY2MDE1OSwiaWF0IjoxNzQxNjU4MzU5LCJqdGkiOiJkYjllNDdjMS1mYTgzLTQ1MGEtODczZC1hYWEwMWMwZWUxOTcifQ.el1KEqmhjDtenj4F4zJjYxV06tpUJgazJqnAB11d2Ac HTTP/1.1" 200 OK
+2025-03-10 17:59:32,788 - evrmore_authentication.auth - INFO - Successfully connected to Evrmore node
+Using JWT secret: evrmo...
+Using JWT secret: evrmo...
+INFO:     127.0.0.1:47312 - "GET /me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42366 - "POST /logout HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1202861]

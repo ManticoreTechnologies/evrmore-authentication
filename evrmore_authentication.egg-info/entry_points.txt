@@ -1,0 +1,4 @@
+[console_scripts]
+evrmore-auth = evrmore_authentication.cli:main
+evrmore-auth-api = evrmore_authentication:api_server_main
+
