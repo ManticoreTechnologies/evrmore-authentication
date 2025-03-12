@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="evrmore-authentication",
-    version="0.1.0",
+    version="0.3.0",
     author="Manticore Technologies",
     author_email="dev@manticore.technology",
     description="Authentication system using Evrmore blockchain signatures",
@@ -25,20 +25,19 @@ setup(
         "Topic :: Security :: Cryptography",
     ],
     packages=find_packages(),
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     install_requires=[
-        "evrmore-rpc",
-        "psycopg2-binary>=2.9.3",
-        "sqlalchemy>=1.4.0",
-        "alembic>=1.7.5",
+        "evrmore-rpc>=0.1.0",
         "pyjwt>=2.3.0",
         "cryptography>=36.0.0",
         "fastapi>=0.75.0",
-        "passlib>=1.7.4",
+        "uvicorn>=0.17.0",
+        "python-dotenv>=0.19.0",
+        "pydantic>=1.9.0",
     ],
     entry_points={
         "console_scripts": [
-            "evrmore-auth=evrmore_authentication.cli:main",
+            "evrmore-auth-api=evrmore_authentication:run_api_main",
         ],
     },
 ) 

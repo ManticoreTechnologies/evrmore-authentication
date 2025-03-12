@@ -1,49 +1,51 @@
 # Evrmore Authentication
 
-![Evrmore Authentication](https://raw.githubusercontent.com/manticoretechnologies/evrmore-authentication/main/docs/logo.png)
+<div align="center">
+  <img src="assets/images/logo.svg" alt="Evrmore Authentication" width="200">
+  <h1>Evrmore Authentication</h1>
+  <p>Secure blockchain-based authentication using Evrmore wallet signatures</p>
+</div>
 
-*Secure blockchain-based authentication using Evrmore wallet signatures*
-
----
-
-## What is Evrmore Authentication?
+## Overview
 
 Evrmore Authentication is a Python package that provides a secure, blockchain-based authentication system for your applications. It leverages Evrmore wallet signatures to verify user identity without storing passwords.
 
-## Features
+## Key Features
 
 - **Blockchain-based Authentication**: Uses Evrmore wallet signatures for secure user authentication
 - **Challenge-Response Protocol**: Generates unique challenges for each authentication attempt
-- **PostgreSQL Integration**: Stores user data and session information in a PostgreSQL database
-- **Atomic Operations**: Ensures transaction integrity with database-level atomicity
+- **Multiple Backend Options**: Supports PostgreSQL and Redis as backend storage
 - **JWT Support**: Issues and validates JSON Web Tokens for authenticated sessions
-- **Modern Auth Workflows**: Supports standard OAuth2 flows
+- **FastAPI Integration**: Ready-to-use FastAPI endpoints for authentication
 - **Comprehensive Security**: Protection against common attack vectors
 
-## Why Use Blockchain Authentication?
+## Quick Start
 
-Traditional password-based authentication has many weaknesses:
+```bash
+# Install the package
+pip3 install evrmore-authentication
 
-- Password reuse across sites
-- Vulnerability to phishing attacks
-- Security breaches exposing password hashes
-- Password recovery complexity
+# Run the API server
+python3 -m scripts.run_api_server --host 0.0.0.0 --port 8000
 
-Blockchain-based authentication solves these issues by:
+# Run the web demo
+python3 -m scripts.run_web_demo --port 5000 --api-url http://localhost:8000
+```
 
-- Eliminating passwords entirely
-- Using proven cryptographic signing
-- Preventing replay attacks
-- Providing decentralized identity verification
+## Documentation Sections
 
-## Quick Links
+- [User Guide](user-guide/index.md) - Comprehensive guide for using the package
+- [API Reference](api-reference/index.md) - Detailed technical reference
+- [Examples](examples/index.md) - Code examples and tutorials
+- [Development](development/index.md) - Contributing to the project
 
-- [Getting Started](./guide.md#installation)
-- [Configuration](./guide.md#configuration)
-- [API Documentation](./api.md)
-- [FastAPI Integration](./guide.md#fastapi-integration)
-- [Security Considerations](./guide.md#security-considerations)
-- [GitHub Repository](https://github.com/manticoretechnologies/evrmore-authentication)
+## Authentication Flow
+
+1. **Challenge Generation**: The server generates a unique challenge for a user's Evrmore address
+2. **Signature Creation**: The user signs the challenge with their Evrmore wallet
+3. **Verification**: The server verifies the signature against the challenge
+4. **Token Issuance**: Upon successful verification, a JWT token is issued
+5. **Authentication**: The token is used for subsequent API requests
 
 ## About Manticore Technologies
 

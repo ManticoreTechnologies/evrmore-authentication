@@ -7,7 +7,7 @@ with a real Evrmore node. It provides a command-line interface for generating
 challenges, signing messages, and verifying signatures.
 
 Usage:
-  python3 manual_test.py
+  python3 manual_test.py [command] [options]
 """
 
 import os
@@ -20,7 +20,6 @@ import uuid
 os.environ["JWT_SECRET"] = "test-secret-key-not-for-production"
 
 from evrmore_authentication import EvrmoreAuth 
-from evrmore_authentication.db import init_db
 from evrmore_authentication.exceptions import (
     AuthenticationError,
     InvalidSignatureError,
@@ -36,9 +35,6 @@ def setup_parser():
     )
     
     subparsers = parser.add_subparsers(dest="command", help="Command to run")
-    
-    # initialize command
-    init_parser = subparsers.add_parser("init", help="Initialize the database")
     
     # generate command
     generate_parser = subparsers.add_parser("generate", help="Generate a challenge for an address")
@@ -61,17 +57,6 @@ def setup_parser():
     
     return parser
 
-def command_init():
-    """Initialize the database."""
-    try:
-        print("Initializing database...")
-        init_db()
-        print("Database initialized successfully.")
-        return 0
-    except Exception as e:
-        print(f"Error initializing database: {e}")
-        return 1
-
 def command_generate(address):
     """Generate a challenge for an address."""
     try:
@@ -84,7 +69,7 @@ def command_generate(address):
         print("-" * 80)
         
         print("\nTo sign this challenge with Evrmore CLI:")
-        print(f"signmessage {address} \"{challenge}\"")
+        print(f"evrmore-cli signmessage {address} \"{challenge}\"")
         
         return 0
     except Exception as e:
@@ -128,10 +113,10 @@ def command_direct(address, message, signature):
         auth = EvrmoreAuth()
         
         print("Directly verifying signature using Evrmore RPC...")
-        result = auth.evrmore_client.verifymessage(
+        result = auth.verify_signature(
             address,
-            signature,
-            message
+            message,
+            signature
         )
         
         if result:
@@ -166,7 +151,7 @@ def command_interactive():
         print("-" * 80)
         
         print("\nTo sign this challenge with Evrmore CLI:")
-        print(f"signmessage {address} \"{challenge}\"")
+        print(f"evrmore-cli signmessage {address} \"{challenge}\"")
         
         # Get signature
         signature = input("\nEnter signature (or press Enter to exit): ").strip()
@@ -211,10 +196,7 @@ def main():
         parser.print_help()
         return 1
     
-    if args.command == "init":
-        return command_init()
-    
-    elif args.command == "generate":
+    if args.command == "generate":
         return command_generate(args.address)
     
     elif args.command == "verify":

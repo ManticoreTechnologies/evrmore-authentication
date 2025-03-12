@@ -9,12 +9,12 @@ import uuid
 import datetime
 import secrets
 import logging
-from typing import Optional, Dict, Any, Union
+from typing import Optional, Dict, Any, Union, Tuple
 from dataclasses import dataclass
 import jwt
-from evrmore_rpc import EvrmoreClient
 
-from .models import User, Challenge, Session as DBSession
+from .crypto import verify_message, generate_key_pair
+from .models import User, Challenge, Session
 from .exceptions import (
     AuthenticationError,
     ChallengeExpiredError, 
@@ -30,10 +30,6 @@ from .exceptions import (
 logger = logging.getLogger(__name__)
 
 # Environment configuration with defaults
-EVRMORE_RPC_HOST = os.getenv("EVRMORE_RPC_HOST", "localhost")
-EVRMORE_RPC_PORT = int(os.getenv("EVRMORE_RPC_PORT", "8819"))
-EVRMORE_RPC_USER = os.getenv("EVRMORE_RPC_USER", "")
-EVRMORE_RPC_PASSWORD = os.getenv("EVRMORE_RPC_PASSWORD", "")
 JWT_SECRET = os.getenv("JWT_SECRET", secrets.token_hex(32))
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
@@ -59,38 +55,19 @@ class EvrmoreAuth:
     """
     
     # Class attribute to track Evrmore node availability
-    evrmore_available = False
+    evrmore_available = True
     
-    def __init__(self, evrmore_client=None, db=None):
+    def __init__(self, jwt_secret=None, jwt_algorithm=None):
         """Initialize authentication system.
         
         Args:
-            evrmore_client: Optional EvrmoreClient instance
-            db: Optional database client instance
+            jwt_secret: Secret for JWT token encryption
+            jwt_algorithm: Algorithm for JWT token encryption
         """
-        self.db = db
-        self.jwt_secret = JWT_SECRET
+        self.jwt_secret = jwt_secret or JWT_SECRET
+        self.jwt_algorithm = jwt_algorithm or JWT_ALGORITHM
             
-        # Set up Evrmore RPC client
-        try:
-            self.evrmore_client = evrmore_client or EvrmoreClient()
-            # Test connection
-            self.evrmore_client.getblockchaininfo()
-            logger.info("Successfully connected to Evrmore node")
-            EvrmoreAuth.evrmore_available = True
-        except Exception as e:
-            logger.error(f"Failed to initialize Evrmore RPC: {str(e)}")
-            EvrmoreAuth.evrmore_available = False
-            self.evrmore_client = None
-            raise ConfigurationError(f"Evrmore RPC initialization failed: {str(e)}")
-    
-    def _get_db(self):
-        """Get database connection."""
-        if self.db is not None:
-            return self.db
-        
-        from .db import get_db
-        return get_db()
+        logger.info("Initialized Evrmore authentication")
 
     def generate_challenge(self, evrmore_address, expire_minutes=CHALLENGE_EXPIRE_MINUTES):
         """Generate a challenge for a user to sign.
@@ -102,27 +79,35 @@ class EvrmoreAuth:
         Returns:
             Challenge text to be signed
         """
-        from .db import create_user, create_challenge, get_user_by_address
-        
         # Keep original address format for signing
         original_address = evrmore_address.strip()
         
         # Get or create user (using original case)
-        user_data = get_user_by_address(original_address)
-        if not user_data:
-            user_data = create_user(original_address)
+        user = User.get_by_address(original_address)
+        if not user:
+            # Create a new user
+            user = User(
+                id=str(uuid.uuid4()),
+                evrmore_address=original_address
+            )
+            user.save()
+            logger.info(f"Created new user with address: {original_address}")
         
-        # Generate challenge with expiration, using original address
+        # Generate a challenge
         challenge_text = self._create_challenge_text(original_address)
         expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=expire_minutes)
         
-        # Store challenge
-        create_challenge(
-            user_id=user_data["id"],
+        # Create challenge in database
+        challenge = Challenge(
+            id=str(uuid.uuid4()),
+            user_id=user.id,
             challenge_text=challenge_text,
-            expires_at=expires_at
+            expires_at=expires_at,
+            used=False
         )
+        challenge.save()
         
+        logger.info(f"Generated challenge for user {user.id}: {challenge_text}")
         return challenge_text
 
     def authenticate(
@@ -134,96 +119,96 @@ class EvrmoreAuth:
         user_agent=None,
         token_expire_minutes=JWT_ACCESS_TOKEN_EXPIRE_MINUTES
     ):
-        """Authenticate a user using their signed challenge.
-        
-        Automatically creates users if they don't exist.
+        """Authenticate a user with their signed challenge.
         
         Args:
-            evrmore_address: User's Evrmore address
-            challenge: Challenge text that was signed
-            signature: Signature from wallet
-            ip_address: Optional client IP
-            user_agent: Optional client user agent
-            token_expire_minutes: Minutes until token expires
-                
+            evrmore_address: The Evrmore address that signed the challenge
+            challenge: The challenge text that was signed
+            signature: The signature created by signing the challenge
+            ip_address: User's IP address (optional)
+            user_agent: User's agent string (optional)
+            token_expire_minutes: Minutes until token expires (optional)
+            
         Returns:
-            UserSession with authentication token
+            UserSession with token and user information
+            
+        Raises:
+            UserNotFoundError: If user with the address is not found
+            ChallengeExpiredError: If the challenge has expired
+            ChallengeAlreadyUsedError: If the challenge has already been used
+            InvalidSignatureError: If signature verification fails
         """
-        from .db import (
-            get_user_by_address, 
-            create_user,
-            get_challenge_by_text, 
-            mark_challenge_used,
-            create_session,
-            update_user,
-            get_user_by_id
-        )
+        clean_address = evrmore_address.strip()
+        clean_challenge = challenge.strip()
+        clean_signature = signature.strip()
         
-        # Preserve original address format
-        original_address = evrmore_address.strip()
+        # Find user by address
+        user = User.get_by_address(clean_address)
+        if not user:
+            raise UserNotFoundError(f"User with address {clean_address} not found")
         
-        # Get challenge first to avoid race conditions
-        challenge_data = get_challenge_by_text(challenge)
-        if not challenge_data:
-            raise ChallengeExpiredError()
+        # Find challenge record
+        challenge_record = Challenge.get_by_text(clean_challenge)
+        if not challenge_record:
+            raise AuthenticationError(f"Challenge not found: {clean_challenge}")
         
+        # Check if challenge belongs to the user
+        if challenge_record.user_id != user.id:
+            logger.warning(f"Challenge belongs to different user")
+            raise AuthenticationError("Challenge does not belong to this user")
+            
+        # Check if challenge has been used
+        if challenge_record.used:
+            raise ChallengeAlreadyUsedError("This challenge has already been used")
+            
         # Check if challenge has expired
-        challenge_obj = Challenge.from_dict(challenge_data)
-        if challenge_obj.is_expired:
-            raise ChallengeExpiredError(challenge_obj.id)
-        
-        # Check if challenge has already been used
-        if challenge_data["used"]:
-            raise ChallengeAlreadyUsedError(challenge_obj.id)
-        
-        # Get user from challenge's user_id to ensure we're using the same user 
-        # that was created during challenge generation
-        user_data = get_user_by_id(challenge_data["user_id"])
-        
-        # If user doesn't exist (which should be rare), recreate it
-        if not user_data:
-            # This is an unusual case but we'll handle it
-            logger.warning(f"User not found for challenge {challenge_obj.id}, recreating user")
-            user_data = create_user(original_address)
-        
+        if challenge_record.is_expired:
+            raise ChallengeExpiredError(f"Challenge expired at {challenge_record.expires_at}")
+            
         # Verify signature
-        if not self.verify_signature(original_address, challenge, signature):
-            logger.warning(f"Invalid signature for {original_address}")
-            raise InvalidSignatureError(original_address)
+        if not self.verify_signature(clean_address, clean_challenge, clean_signature):
+            raise InvalidSignatureError("Invalid signature")
+            
+        # Mark challenge as used
+        challenge_record.used = True
+        challenge_record.save()
         
-        # Mark challenge used
-        mark_challenge_used(challenge_data["id"])
-        
-        # Create session token
-        token_expires = datetime.datetime.utcnow() + datetime.timedelta(minutes=token_expire_minutes)
-        user_id = str(user_data["id"])
+        # Generate a token
+        expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=token_expire_minutes)
+        token_id = str(uuid.uuid4())
         
         payload = {
-            "sub": user_id,
-            "addr": original_address,
-            "exp": int(token_expires.timestamp()),
-            "iat": int(datetime.datetime.utcnow().timestamp()),
-            "jti": str(uuid.uuid4())
+            "sub": str(user.id),
+            "address": clean_address,
+            "jti": token_id,
+            "iat": datetime.datetime.utcnow(),
+            "exp": expires_at
         }
         
-        token = jwt.encode(payload, self.jwt_secret, algorithm=JWT_ALGORITHM)
+        token = jwt.encode(payload, self.jwt_secret, algorithm=self.jwt_algorithm)
         
         # Record session and update user
-        create_session(
-            user_id=user_id,
+        session = Session(
+            id=str(uuid.uuid4()),
+            user_id=user.id,
             token=token,
-            expires_at=token_expires,
+            created_at=datetime.datetime.utcnow(),
+            expires_at=expires_at,
+            is_active=True,
             ip_address=ip_address,
             user_agent=user_agent
         )
+        session.save()
         
-        update_user(user_id, last_login=datetime.datetime.utcnow())
+        # Update user's last login time
+        user.last_login = datetime.datetime.utcnow()
+        user.save()
         
         return UserSession(
-            user_id=user_id,
-            evrmore_address=original_address,
+            user_id=str(user.id),
+            evrmore_address=user.evrmore_address,
             token=token,
-            expires_at=token_expires
+            expires_at=expires_at
         )
 
     def validate_token(self, token):
@@ -235,21 +220,19 @@ class EvrmoreAuth:
         Returns:
             Decoded token payload if valid
         """
-        from .db import get_session_by_token
-        
         try:
             # Decode and validate token
             # Note: We ignore the "iat" (issued at) validation to avoid timezone/clock issues
             payload = jwt.decode(
                 token, 
                 self.jwt_secret, 
-                algorithms=[JWT_ALGORITHM],
+                algorithms=[self.jwt_algorithm],
                 options={"verify_iat": False}  # Skip "issued at" verification
             )
             
             # Check if token is still active
-            session_data = get_session_by_token(token)
-            if not session_data or not session_data["is_active"]:
+            session = Session.get_by_token(token)
+            if not session or not session.is_active:
                 raise InvalidTokenError("Token has been invalidated")
             
             return payload
@@ -267,19 +250,32 @@ class EvrmoreAuth:
         Returns:
             User object if token is valid
         """
-        from .db import get_user_by_id
-        
         payload = self.validate_token(token)
         user_id = payload.get("sub")
         
         if not user_id:
             raise InvalidTokenError("Token does not contain user ID")
         
-        user_data = get_user_by_id(user_id)
-        if not user_data:
+        user = User.get_by_id(user_id)
+        if not user:
             raise UserNotFoundError(user_id)
         
-        return User.from_dict(user_data)
+        return user
+
+    def get_user_by_id(self, user_id):
+        """Get user by ID.
+        
+        Args:
+            user_id: User ID
+            
+        Returns:
+            User object if found
+        """
+        user = User.get_by_id(user_id)
+        if not user:
+            raise UserNotFoundError(user_id)
+        
+        return user
 
     def invalidate_token(self, token):
         """Invalidate a token (logout).
@@ -290,15 +286,14 @@ class EvrmoreAuth:
         Returns:
             True if successful
         """
-        from .db import get_session_by_token, invalidate_session
-        
         try:
-            session_data = get_session_by_token(token)
-            if not session_data:
+            session = Session.get_by_token(token)
+            if not session:
                 logger.warning(f"Token not found: {token[:10]}...")
                 return False
             
-            invalidate_session(session_data["id"])
+            session.is_active = False
+            session.save()
             return True
             
         except Exception as e:
@@ -314,11 +309,17 @@ class EvrmoreAuth:
         Returns:
             True if successful
         """
-        from .db import invalidate_all_sessions
-        
         try:
             user_id = str(user_id)
-            count = invalidate_all_sessions(user_id)
+            sessions = Session.get_by_user_id(user_id)
+            count = 0
+            
+            for session in sessions:
+                if session.is_active:
+                    session.is_active = False
+                    session.save()
+                    count += 1
+                    
             logger.info(f"Invalidated {count} tokens for user {user_id}")
             return True
             
@@ -337,9 +338,6 @@ class EvrmoreAuth:
         Returns:
             True if signature is valid
         """
-        if not EvrmoreAuth.evrmore_available:
-            raise ConfigurationError("Evrmore node is not available")
-        
         # Clean inputs
         clean_address = address.strip()
         clean_message = message.strip()
@@ -347,7 +345,6 @@ class EvrmoreAuth:
         
         logger.info(f"Verifying signature for address: {clean_address}")
         logger.info(f"Message: {clean_message}")
-        logger.info(f"Signature: {clean_signature}")
         
         # Try verification with different formats
         verification_attempts = [
@@ -362,30 +359,19 @@ class EvrmoreAuth:
         for i, (test_address, test_message) in enumerate(verification_attempts, 1):
             try:
                 logger.info(f"Attempt {i}: Verifying with address: '{test_address}', message: '{test_message}'")
-                result = self.evrmore_client.verifymessage(test_address, clean_signature, test_message)
+                result = verify_message(test_address, clean_signature, test_message)
                 logger.info(f"Attempt {i} result: {result}")
                 if result:
                     logger.info(f"✅ Signature verification successful with method {i}")
                     return True
             except Exception as e:
                 logger.warning(f"Verification attempt {i} failed with error: {str(e)}")
-                # Try diagnostics with a known good address if the issue is "Invalid address"
-                if "Invalid address" in str(e) and i == 1:
-                    try:
-                        # Try to get a valid address for testing
-                        test_addr = self.evrmore_client.getnewaddress()
-                        logger.info(f"Testing with a known good address: {test_addr}")
-                        # Just do a query to see if RPC is working
-                        self.evrmore_client.validateaddress(test_addr)
-                        logger.info("RPC connection is working with valid addresses")
-                    except Exception as test_err:
-                        logger.error(f"Error during address test: {str(test_err)}")
         
-        logger.warning("❌ All signature verification attempts failed")
+        logger.error("❌ All signature verification methods failed")
         return False
 
     def _create_challenge_text(self, evrmore_address):
-        """Create a challenge text.
+        """Create a unique challenge text for an address.
         
         Args:
             evrmore_address: User's Evrmore address
@@ -393,7 +379,30 @@ class EvrmoreAuth:
         Returns:
             Challenge text
         """
+        # Create a unique, timestamped challenge
         timestamp = int(datetime.datetime.utcnow().timestamp())
-        random_part = uuid.uuid4().hex[:16]
+        unique_id = secrets.token_hex(8)
+        return f"Sign this message to authenticate with Evrmore: {evrmore_address}:{timestamp}:{unique_id}"
+
+    def create_wallet_address(self):
+        """Create a new Evrmore wallet address for testing.
         
-        return f"Sign this message to authenticate with Evrmore: {evrmore_address}:{timestamp}:{random_part}" 
+        Returns:
+            A new Evrmore address
+        """
+        wif_key, address = generate_key_pair()
+        logger.info(f"Generated new test address: {address}")
+        return address, wif_key
+        
+    def sign_message(self, wif_key, message):
+        """Sign a message with an Evrmore private key.
+        
+        Args:
+            wif_key: The WIF-encoded private key
+            message: The message to sign
+            
+        Returns:
+            Base64-encoded signature
+        """
+        from .crypto import sign_message as crypto_sign_message
+        return crypto_sign_message(message, wif_key) 

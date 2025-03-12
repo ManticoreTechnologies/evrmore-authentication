@@ -1,0 +1,20 @@
+# Documentation build directories
+_build/
+build/
+site/
+
+# MkDocs specific
+site/
+
+# Sphinx specific
+_build/
+.doctrees/
+.buildinfo
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Generated files
+*.pyc
+__pycache__/
+.DS_Store 

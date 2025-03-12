@@ -57,8 +57,6 @@ async def get_current_user(
         )
     
     try:
-        from .db import get_user_by_id
-        
         # Validate the token
         payload = auth.validate_token(token)
         
@@ -67,13 +65,12 @@ async def get_current_user(
         if not user_id:
             raise InvalidTokenError("Token does not contain user ID")
         
-        # Get user from database
-        user_data = get_user_by_id(user_id)
-        if not user_data:
+        # Get user from database directly
+        user = User.get_by_id(user_id)
+        if not user:
             raise UserNotFoundError(user_id)
         
-        # Convert to User object
-        return User.from_dict(user_data)
+        return user
         
     except Exception as e:
         logger.warning(f"Authentication error: {str(e)}")

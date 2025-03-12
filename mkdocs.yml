@@ -1,0 +1,61 @@
+site_name: Evrmore Authentication
+site_url: https://manticoretechnologies.github.io/evrmore-authentication/
+site_description: Secure blockchain-based authentication using Evrmore wallet signatures
+site_author: Manticore Technologies
+repo_url: https://github.com/manticoretechnologies/evrmore-authentication
+repo_name: manticoretechnologies/evrmore-authentication
+
+theme:
+  name: material
+  palette:
+    primary: indigo
+    accent: indigo
+  logo: docs/assets/images/logo.svg
+  favicon: docs/assets/images/logo.svg
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+
+nav:
+  - Home: index.md
+  - User Guide:
+    - Introduction: user-guide/index.md
+  - API Reference:
+    - Overview: api-reference/index.md
+    - SQLite Implementation: api-reference/sqlite.md
+  - Examples:
+    - Overview: examples/index.md
+  - Development:
+    - Guide: development/index.md
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - admonition
+  - pymdownx.details
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/manticoretechnologies
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/evrmore-authentication/
+  
+copyright: Copyright &copy; 2023-2024 Manticore Technologies 

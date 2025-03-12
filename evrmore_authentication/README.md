@@ -1,20 +1,44 @@
 # Evrmore Authentication
 
-[![PyPI version](https://badge.fury.io/py/evrmore-authentication.svg)](https://badge.fury.io/py/evrmore-authentication)
-[![Documentation Status](https://readthedocs.io/en/latest/?badge=latest)](https://evrmore-authentication.readthedocs.io/en/latest/?badge=latest)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<div align="center">
+  <img src="https://raw.githubusercontent.com/EvrmoreOrg/evrmore-graphics/master/evrmore-logos/evr_logo_blue_200.png" alt="Evrmore" width="200"/>
+  <br><br>
+  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+  [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/downloads/)
+  [![PyPI](https://img.shields.io/badge/PyPI-v0.3.0-blue?style=for-the-badge&logo=pypi&logoColor=white)](https://pypi.org/project/evrmore-authentication/)
+  
+  <h3>Secure blockchain-based authentication using Evrmore wallet signatures</h3>
+</div>
 
-A robust and secure authentication system that leverages Evrmore blockchain signatures for user authentication and session management.
+<div align="center">
+  <a href="#features">Features</a> •
+  <a href="#installation">Installation</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#api-endpoints">API</a> •
+  <a href="#documentation">Docs</a>
+</div>
+
+---
 
 ## Features
 
-- **Blockchain-based Authentication**: Uses Evrmore wallet signatures for secure user authentication
-- **Challenge-Response Protocol**: Generates unique challenges for each authentication attempt
-- **PostgreSQL Integration**: Stores user data and session information in a PostgreSQL database
-- **Atomic Operations**: Ensures transaction integrity with database-level atomicity
-- **JWT Support**: Issues and validates JSON Web Tokens for authenticated sessions
-- **Modern Auth Workflows**: Supports standard OAuth2 flows
-- **Comprehensive Security**: Protection against common attack vectors
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin: 20px 0;">
+  <div style="border: 1px solid #ddd; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h3 style="color: #5275c8;">🔐 Blockchain-based Auth</h3>
+    <p>Secure authentication using cryptographic signatures from Evrmore wallets - no passwords needed!</p>
+  </div>
+  
+  <div style="border: 1px solid #ddd; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h3 style="color: #5275c8;">🔄 Challenge-Response</h3>
+    <p>Generated signature challenges ensure secure, replay-proof authentication</p>
+  </div>
+  
+  <div style="border: 1px solid #ddd; border-radius: 10px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h3 style="color: #5275c8;">⚙️ Easy Setup</h3>
+    <p>SQLite backend and auto-configuration make deployment simple</p>
+  </div>
+</div>
 
 ## Installation
 
@@ -22,111 +46,113 @@ A robust and secure authentication system that leverages Evrmore blockchain sign
 pip3 install evrmore-authentication
 ```
 
-## Configuration
-
-Create a configuration file (`.env` or similar):
-
-```
-# Evrmore RPC Configuration
-EVRMORE_RPC_HOST=localhost
-EVRMORE_RPC_PORT=8819
-EVRMORE_RPC_USER=yourusername
-EVRMORE_RPC_PASSWORD=yourpassword
-
-# Database Configuration
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=evrmore_auth
-DB_USER=postgres
-DB_PASSWORD=yourdbpassword
-
-# JWT Configuration
-JWT_SECRET=your-secure-secret-key
-JWT_ALGORITHM=HS256
-JWT_ACCESS_TOKEN_EXPIRE_MINUTES=30
-```
-
-If no RPC credentials are provided, the library will automatically try to use the default evrmore.conf file location.
-
 ## Quick Start
 
-### Set up the database
+<div style="background-color: #f8f9fa; border-radius: 10px; padding: 20px; margin: 20px 0; border-left: 5px solid #5275c8;">
 
-```python
-from evrmore_authentication.db import init_db
-
-init_db()
-```
-
-### Basic Authentication Flow
+### Basic Example
 
 ```python
 from evrmore_authentication import EvrmoreAuth
 
-# Initialize the auth system
+# Initialize auth system
 auth = EvrmoreAuth()
 
-# Generate a challenge for a user
-challenge = auth.generate_challenge(evrmore_address="EXaMPLeEvRMoReAddResS")
-
-# On the client side, the user would sign this challenge with their wallet
-# When the signed message is received:
-signed_message = "user_signed_message_from_wallet"
+# Generate a challenge for a user to sign
+challenge = auth.generate_challenge(evrmore_address="EVRaddressHere")
 
 # Verify the signature and create a session
-user_session = auth.authenticate(
-    evrmore_address="EXaMPLeEvRMoReAddResS",
+session = auth.authenticate(
+    evrmore_address="EVRaddressHere", 
     challenge=challenge,
-    signature=signed_message
+    signature="signatureFromWallet"
 )
 
-# Use the session token for subsequent requests
-token = user_session.token
+# Use the token for subsequent requests
+token = session.token
+print(f"User authenticated! Token: {token[:20]}...")
+
+# Later, validate the token
+auth.validate_token(token)
+
+# Get user information
+user = auth.get_user_by_token(token)
+
+# Logout (invalidate token)
+auth.invalidate_token(token)
 ```
 
-### In a FastAPI Application
+### Authentication Flow
 
-```python
-from fastapi import FastAPI, Depends, HTTPException
-from evrmore_authentication import EvrmoreAuth, get_current_user
+<img src="https://mermaid.ink/img/pako:eNptkU1PwzAMhv9KlHPR9g-gF8SAAF040Q0JcQh1qJVmIXGXD2mT-O8kbScGu8V-_NrxG-eJWKuR5KRC-KXygUPryDAF3aPvcUkZZW1Y8VBLroXcBPQrjMbMCt2DPmARcIxeKKkw8p-d6B4MRFvCJjBCU7sI0YPp0Y07NrYGD3vg0lmmMpblrXQcVq85XQwH9zDH3XOUspMWyBJ-xhc2b3IkJ2Jm4dxr7-S1lMpvMaAzCuJfM64UyE3V0-xvqGxgreBm0juvjfgMkNeBx-rAG-8D75I6Vb-fSe5iK_k7Vn9cGcQPJSWE0R1W5w5c8aLsZ1Q9kXwtDV5HVR_IM8nmrKhZNuVplrAsK8qcT7KCQsmmLM8mbJrn03TKiglLSPbx4TQmX_1MX04?type=png" alt="Authentication Flow" style="max-width: 100%; height: auto; display: block; margin: 20px auto;">
 
-app = FastAPI()
-auth = EvrmoreAuth()
+</div>
 
-@app.post("/auth/challenge")
-async def get_challenge(evrmore_address: str):
-    challenge = auth.generate_challenge(evrmore_address=evrmore_address)
-    return {"challenge": challenge}
+## API Endpoints
 
-@app.post("/auth/login")
-async def login(evrmore_address: str, challenge: str, signature: str):
-    try:
-        session = auth.authenticate(
-            evrmore_address=evrmore_address,
-            challenge=challenge,
-            signature=signature
-        )
-        return {"access_token": session.token, "token_type": "bearer"}
-    except Exception as e:
-        raise HTTPException(status_code=401, detail=str(e))
+The included API server provides these endpoints:
 
-@app.get("/users/me")
-async def read_users_me(current_user = Depends(get_current_user)):
-    return current_user
+<table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+  <thead style="background-color: #5275c8; color: white;">
+    <tr>
+      <th style="padding: 15px; text-align: left;">Endpoint</th>
+      <th style="padding: 15px; text-align: left;">Method</th>
+      <th style="padding: 15px; text-align: left;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="background-color: #f8f9fa;">
+      <td style="padding: 15px; border-top: 1px solid #ddd;"><code>/challenge</code></td>
+      <td style="padding: 15px; border-top: 1px solid #ddd;">POST</td>
+      <td style="padding: 15px; border-top: 1px solid #ddd;">Generate a challenge for a user</td>
+    </tr>
+    <tr>
+      <td style="padding: 15px; border-top: 1px solid #ddd;"><code>/authenticate</code></td>
+      <td style="padding: 15px; border-top: 1px solid #ddd;">POST</td>
+      <td style="padding: 15px; border-top: 1px solid #ddd;">Authenticate with a signed challenge</td>
+    </tr>
+    <tr style="background-color: #f8f9fa;">
+      <td style="padding: 15px; border-top: 1px solid #ddd;"><code>/validate</code></td>
+      <td style="padding: 15px; border-top: 1px solid #ddd;">GET</td>
+      <td style="padding: 15px; border-top: 1px solid #ddd;">Validate a JWT token</td>
+    </tr>
+    <tr>
+      <td style="padding: 15px; border-top: 1px solid #ddd;"><code>/me</code></td>
+      <td style="padding: 15px; border-top: 1px solid #ddd;">GET</td>
+      <td style="padding: 15px; border-top: 1px solid #ddd;">Get authenticated user information</td>
+    </tr>
+    <tr style="background-color: #f8f9fa;">
+      <td style="padding: 15px; border-top: 1px solid #ddd;"><code>/logout</code></td>
+      <td style="padding: 15px; border-top: 1px solid #ddd;">POST</td>
+      <td style="padding: 15px; border-top: 1px solid #ddd;">Invalidate a JWT token (logout)</td>
+    </tr>
+  </tbody>
+</table>
+
+## Running the Server
+
+```bash
+# With the installed package
+evrmore-auth-api --host 0.0.0.0 --port 8000
+
+# Or with the provided script
+./run_api.py --port 8000
+
+# Run the demo web interface
+./run_web_demo.py --port 5000 --api-url http://localhost:8000
 ```
 
 ## Documentation
 
-For full documentation, visit [https://manticoretechnologies.github.io/evrmore-authentication/](https://manticoretechnologies.github.io/evrmore-authentication/)
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+<div style="display: flex; flex-wrap: wrap; gap: 16px; margin: 20px 0;">
+  <a href="https://manticoretechnologies.github.io/evrmore-authentication/" style="display: inline-block; padding: 15px 25px; background-color: #5275c8; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    📖 Full Documentation
+  </a>
+  <a href="https://github.com/manticoretechnologies/evrmore-authentication/issues" style="display: inline-block; padding: 15px 25px; background-color: #f8f9fa; color: #333; text-decoration: none; border-radius: 8px; border: 1px solid #ddd; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    🐛 Report Issues
+  </a>
+</div>
 
 ## License
 
-MIT License
-
-## Copyright
-
-© 2023 Manticore Technologies - [manticore.technology](https://manticore.technology) 
+MIT License © 2023-2024 [Manticore Technologies](https://manticore.technology) 
