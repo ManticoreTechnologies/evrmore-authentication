@@ -9,6 +9,18 @@
          <lastmod>2025-03-14</lastmod>
     </url>
     <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/api-reference/core-api/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/api-reference/event-hooks/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/api-reference/oauth-api/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://manticoretechnologies.github.io/evrmore-authentication/api-reference/sqlite/</loc>
          <lastmod>2025-03-14</lastmod>
     </url>
@@ -17,7 +29,35 @@
          <lastmod>2025-03-14</lastmod>
     </url>
     <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/development/contributing/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/development/release-process/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/development/security/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/development/testing/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://manticoretechnologies.github.io/evrmore-authentication/examples/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/examples/basic-demo/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/examples/fastapi-integration/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/examples/oauth-client/</loc>
          <lastmod>2025-03-14</lastmod>
     </url>
     <url>
@@ -25,7 +65,23 @@
          <lastmod>2025-03-14</lastmod>
     </url>
     <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/user-guide/authentication-flow/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/user-guide/basic-integration/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
          <loc>https://manticoretechnologies.github.io/evrmore-authentication/user-guide/debugging/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/user-guide/oauth-implementation/</loc>
+         <lastmod>2025-03-14</lastmod>
+    </url>
+    <url>
+         <loc>https://manticoretechnologies.github.io/evrmore-authentication/user-guide/troubleshooting/</loc>
          <lastmod>2025-03-14</lastmod>
     </url>
 </urlset>
