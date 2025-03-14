@@ -145,6 +145,30 @@ class User:
         data = dict(row)
         return cls.from_dict(data)
     
+    @classmethod
+    def create(cls, evrmore_address, username=None, email=None):
+        """Create a new user with the provided Evrmore address.
+        
+        Args:
+            evrmore_address: User's Evrmore wallet address
+            username: Optional username
+            email: Optional email address
+            
+        Returns:
+            Newly created User object
+        """
+        user_id = str(uuid.uuid4())
+        user = cls(
+            id=user_id,
+            evrmore_address=evrmore_address,
+            username=username,
+            email=email,
+            is_active=True,
+            created_at=datetime.datetime.utcnow()
+        )
+        user.save()
+        return user
+    
     def to_dict(self):
         """Convert User to a dictionary."""
         return {
@@ -438,4 +462,136 @@ class Session:
         return datetime.datetime.utcnow() > self.expires_at
     
     def __repr__(self):
-        return f"<Session(id={self.id}, user_id={self.user_id}, expired={self.is_expired})>" 
+        return f"<Session(id={self.id}, user_id={self.user_id}, expired={self.is_expired})>"
+
+# Utility functions for database maintenance
+
+def cleanup_expired_challenges():
+    """Remove expired challenges from the database.
+    
+    Returns:
+        Number of challenges removed
+    """
+    db = SQLiteManager()
+    now = datetime.datetime.utcnow().isoformat()
+    
+    # First, get the count of expired challenges
+    row = db.fetchone("SELECT COUNT(*) as count FROM challenges WHERE expires_at < ?", (now,))
+    count = row['count'] if row else 0
+    
+    # Then delete them
+    db.execute("DELETE FROM challenges WHERE expires_at < ?", (now,))
+    
+    return count
+    
+def cleanup_expired_sessions():
+    """Remove expired sessions from the database.
+    
+    Returns:
+        Number of sessions removed
+    """
+    db = SQLiteManager()
+    now = datetime.datetime.utcnow().isoformat()
+    
+    # First, get the count of expired sessions
+    row = db.fetchone("SELECT COUNT(*) as count FROM sessions WHERE expires_at < ?", (now,))
+    count = row['count'] if row else 0
+    
+    # Then delete them
+    db.execute("DELETE FROM sessions WHERE expires_at < ?", (now,))
+    
+    return count
+
+def inspect_database_tables():
+    """Inspect database tables to help with debugging.
+    
+    Returns:
+        Dictionary with table information
+    """
+    db = SQLiteManager()
+    
+    # Get tables
+    tables = db.fetchall("SELECT name FROM sqlite_master WHERE type='table'")
+    table_info = {}
+    
+    for table in tables:
+        table_name = table['name']
+        
+        # Get column info
+        columns = db.fetchall(f"PRAGMA table_info({table_name})")
+        column_info = [
+            {
+                "name": col['name'],
+                "type": col['type'],
+                "notnull": bool(col['notnull']),
+                "pk": bool(col['pk'])
+            }
+            for col in columns
+        ]
+        
+        # Get row count
+        row = db.fetchone(f"SELECT COUNT(*) as count FROM {table_name}")
+        row_count = row['count'] if row else 0
+        
+        table_info[table_name] = {
+            "columns": column_info,
+            "row_count": row_count
+        }
+    
+    return table_info
+    
+def get_user_challenges(user_id):
+    """Get all challenges for a user.
+    
+    Args:
+        user_id: User ID
+        
+    Returns:
+        List of challenges
+    """
+    return Challenge.get_by_user_id(user_id)
+    
+def get_user_sessions(user_id):
+    """Get all sessions for a user.
+    
+    Args:
+        user_id: User ID
+        
+    Returns:
+        List of sessions
+    """
+    return Session.get_by_user_id(user_id)
+
+def check_database_integrity():
+    """Check database integrity.
+    
+    Returns:
+        Dictionary with integrity check results
+    """
+    db = SQLiteManager()
+    
+    # Run SQLite integrity check
+    integrity = db.fetchall("PRAGMA integrity_check")
+    integrity_ok = len(integrity) == 1 and integrity[0]['integrity_check'] == 'ok'
+    
+    # Check for orphaned challenges (user doesn't exist)
+    orphaned_challenges_query = """
+    SELECT COUNT(*) as count FROM challenges 
+    WHERE user_id NOT IN (SELECT id FROM users)
+    """
+    row = db.fetchone(orphaned_challenges_query)
+    orphaned_challenges = row['count'] if row else 0
+    
+    # Check for orphaned sessions (user doesn't exist)
+    orphaned_sessions_query = """
+    SELECT COUNT(*) as count FROM sessions 
+    WHERE user_id NOT IN (SELECT id FROM users)
+    """
+    row = db.fetchone(orphaned_sessions_query)
+    orphaned_sessions = row['count'] if row else 0
+    
+    return {
+        "integrity_check": "ok" if integrity_ok else "failed",
+        "orphaned_challenges": orphaned_challenges,
+        "orphaned_sessions": orphaned_sessions
+    } 

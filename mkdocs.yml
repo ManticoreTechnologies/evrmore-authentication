@@ -23,6 +23,7 @@ nav:
   - Home: index.md
   - User Guide:
     - Introduction: user-guide/index.md
+    - Debugging & Advanced Features: user-guide/debugging.md
   - API Reference:
     - Overview: api-reference/index.md
     - SQLite Implementation: api-reference/sqlite.md

@@ -8,9 +8,30 @@ The package includes built-in Evrmore signature verification without requiring a
 Copyright © 2023-2024 Manticore Technologies - https://manticore.technology
 """
 
-__version__ = "0.3.0"
+import os
+import logging
+from logging.handlers import RotatingFileHandler
+
+__version__ = "1.0.0"
 __author__ = "Manticore Technologies"
 __email__ = "dev@manticore.technology"
+
+# Set up logging
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+log_level = getattr(logging, LOG_LEVEL, logging.INFO)
+
+# Configure the root logger
+logging.basicConfig(
+    level=log_level,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
+
+# Create package logger
+logger = logging.getLogger("evrmore_authentication")
+logger.setLevel(log_level)
 
 from .auth import EvrmoreAuth, UserSession
 from .models import User, Challenge, Session

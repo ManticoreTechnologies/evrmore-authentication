@@ -36,7 +36,7 @@ def run_demo():
     
     # Initialize authentication
     try:
-        auth = EvrmoreAuth()
+        auth = EvrmoreAuth(debug=True)
         logger.info("Successfully connected to Evrmore node and initialized authentication system")
     except Exception as e:
         logger.error(f"Failed to initialize authentication: {e}")
@@ -44,7 +44,7 @@ def run_demo():
 
     # Generate a test address
     try:
-        test_address = auth.evrmore_client.getnewaddress("evr-auth-test")
+        test_address, wif_key = auth.create_wallet_address()
         logger.info(f"Created new Evrmore address: {test_address}")
     except Exception as e:
         logger.error(f"Failed to generate test address: {e}")
@@ -60,7 +60,7 @@ def run_demo():
 
     # Sign the challenge
     try:
-        signature = auth.evrmore_client.signmessage(test_address, challenge)
+        signature = auth.sign_message(wif_key, challenge)
         logger.info(f"Signed challenge with wallet: {signature}")
     except Exception as e:
         logger.error(f"Failed to sign challenge: {e}")

@@ -34,25 +34,25 @@ def run_demo():
     """Run the authentication demo."""
     logger.info("Initializing Evrmore Authentication demo...")
     
-    # Initialize authentication
+    # Initialize authentication with debug mode
     try:
-        auth = EvrmoreAuth()
-        logger.info("Successfully connected to Evrmore node and initialized authentication system")
+        auth = EvrmoreAuth(debug=True)
+        logger.info("Successfully initialized authentication system with debug mode")
     except Exception as e:
         logger.error(f"Failed to initialize authentication: {e}")
         sys.exit(1)
 
     # Generate a test address
     try:
-        test_address = auth.evrmore_client.getnewaddress("evr-auth-test")
-        logger.info(f"Created new Evrmore address: {test_address}")
+        address, wif_key = auth.create_wallet_address()
+        logger.info(f"Created new Evrmore address: {address}")
     except Exception as e:
         logger.error(f"Failed to generate test address: {e}")
         sys.exit(1)
 
     # Generate challenge
     try:
-        challenge = auth.generate_challenge(test_address)
+        challenge = auth.generate_challenge(address)
         logger.info(f"Generated authentication challenge: {challenge}")
     except Exception as e:
         logger.error(f"Failed to generate challenge: {e}")
@@ -60,15 +60,15 @@ def run_demo():
 
     # Sign the challenge
     try:
-        signature = auth.evrmore_client.signmessage(test_address, challenge)
-        logger.info(f"Signed challenge with wallet: {signature}")
+        signature = auth.sign_message(wif_key, challenge)
+        logger.info(f"Signed challenge with wallet: {signature[:20]}...")
     except Exception as e:
         logger.error(f"Failed to sign challenge: {e}")
         sys.exit(1)
 
     # Authenticate
     try:
-        session = auth.authenticate(test_address, challenge, signature)
+        session = auth.authenticate(address, challenge, signature)
         logger.info(f"Successfully authenticated with signature")
         logger.info(f"User ID: {session.user_id}")
         logger.info(f"JWT Token: {session.token[:20]}...")
@@ -81,7 +81,7 @@ def run_demo():
     try:
         token_data = auth.validate_token(session.token)
         logger.info(f"Token validated successfully")
-        logger.info(f"Token payload: {json.dumps(token_data, indent=2)}")
+        logger.info(f"Token payload: {json.dumps(token_data, default=str, indent=2)}")
     except Exception as e:
         logger.error(f"Token validation failed: {e}")
         sys.exit(1)

@@ -1,19 +1,18 @@
 from evrmore_authentication import EvrmoreAuth
-from evrmore_rpc import EvrmoreClient
 
-client = EvrmoreClient()
-auth = EvrmoreAuth(client)
+# Initialize authentication with debug mode
+auth = EvrmoreAuth(debug=True)
 
-# Create a new address
-address = client.getnewaddress()
+# Create a new address for testing
+address, wif_key = auth.create_wallet_address()
 print(address)
 
 # Generate a challenge
 challenge = auth.generate_challenge(address)
 print(challenge)
 
-# Sign the challenge
-signature = client.signmessage(address, challenge)
+# Sign the challenge with our private key
+signature = auth.sign_message(wif_key, challenge)
 print(signature)
 
 # Authenticate
