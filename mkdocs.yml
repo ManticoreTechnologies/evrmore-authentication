@@ -23,14 +23,28 @@ nav:
   - Home: index.md
   - User Guide:
     - Introduction: user-guide/index.md
+    - Authentication Flow: user-guide/authentication-flow.md
+    - Basic Integration: user-guide/basic-integration.md
+    - OAuth 2.0 Implementation: user-guide/oauth-implementation.md
     - Debugging & Advanced Features: user-guide/debugging.md
+    - Troubleshooting: user-guide/troubleshooting.md
   - API Reference:
     - Overview: api-reference/index.md
+    - Core Auth API: api-reference/core-api.md
+    - OAuth 2.0 API: api-reference/oauth-api.md
     - SQLite Implementation: api-reference/sqlite.md
+    - Event Hooks: api-reference/event-hooks.md
   - Examples:
     - Overview: examples/index.md
+    - Basic Authentication Demo: examples/basic-demo.md
+    - FastAPI Integration: examples/fastapi-integration.md
+    - OAuth 2.0 Client: examples/oauth-client.md
   - Development:
-    - Guide: development/index.md
+    - Getting Started: development/index.md
+    - Testing: development/testing.md
+    - Contributing: development/contributing.md
+    - Security: development/security.md
+    - Release Process: development/release-process.md
 
 markdown_extensions:
   - pymdownx.highlight:

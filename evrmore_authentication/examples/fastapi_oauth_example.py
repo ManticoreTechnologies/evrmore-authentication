@@ -46,7 +46,7 @@ else:
 CLIENT_ID = os.environ.get("OAUTH_CLIENT_ID")
 CLIENT_SECRET = os.environ.get("OAUTH_CLIENT_SECRET")
 REDIRECT_URI = os.environ.get("OAUTH_REDIRECT_URI", "http://localhost:8000/callback")
-AUTH_SERVER = os.environ.get("AUTH_SERVER_URL", "http://localhost:8001")
+AUTH_SERVER = os.environ.get("AUTH_SERVER_URL", "auth.manticore.technology")
 
 print(f"Using OAuth Client ID: {CLIENT_ID}")
 print(f"Redirect URI: {REDIRECT_URI}")
