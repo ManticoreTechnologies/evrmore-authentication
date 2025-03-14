@@ -12,6 +12,7 @@ import sys
 import logging
 import argparse
 import secrets
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Configure logging
@@ -24,9 +25,14 @@ logger = logging.getLogger("evrmore-auth-api")
 # Load environment variables
 load_dotenv()
 
-# Force SQLite configuration
+# Use a consistent database path - this is the central database for all components
+DEFAULT_DB_PATH = "./evrmore_authentication/data/evrmore_auth.db"
 os.environ["DB_TYPE"] = "sqlite"
-os.environ["SQLITE_DB_PATH"] = os.getenv("SQLITE_DB_PATH", "./data/evrmore_auth.db")
+os.environ["SQLITE_DB_PATH"] = os.getenv("SQLITE_DB_PATH", DEFAULT_DB_PATH)
+
+# Make sure everyone knows where the database is
+db_path = os.getenv("SQLITE_DB_PATH")
+logger.info(f"Using central database at: {db_path}")
 
 # Make sure JWT_SECRET is set
 if not os.getenv("JWT_SECRET"):
@@ -35,8 +41,7 @@ if not os.getenv("JWT_SECRET"):
     logger.info(f"JWT_SECRET not set in environment. Using a generated value for this session: {jwt_secret[:5]}...")
 
 # Ensure SQLite database directory exists
-sqlite_db_path = os.getenv("SQLITE_DB_PATH", "./data/evrmore_auth.db")
-db_dir = os.path.dirname(sqlite_db_path)
+db_dir = os.path.dirname(db_path)
 if db_dir and not os.path.exists(db_dir):
     try:
         os.makedirs(db_dir, exist_ok=True)

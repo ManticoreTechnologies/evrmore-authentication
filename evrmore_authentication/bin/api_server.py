@@ -21,6 +21,51 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+def run_api_server(host='0.0.0.0', port=8000, reload=False, workers=1, 
+                  log_level='info', no_init_db=False):
+    """
+    Run the Evrmore Authentication API server.
+    
+    Args:
+        host (str): Host to bind to
+        port (int): Port to bind to
+        reload (bool): Enable auto-reload for development
+        workers (int): Number of worker processes
+        log_level (str): Log level (debug, info, warning, error, critical)
+        no_init_db (bool): Skip database initialization on startup
+    """
+    # Set log level
+    log_level_value = getattr(logging, log_level.upper())
+    logging.getLogger().setLevel(log_level_value)
+    
+    # Initialize the database if not disabled
+    if not no_init_db:
+        try:
+            logger.info("Initializing database...")
+            from evrmore_authentication.database import SqliteManager
+            db = SqliteManager()
+            logger.info("Database initialization complete")
+        except Exception as e:
+            logger.error(f"Error initializing database: {str(e)}")
+            if log_level == 'debug':
+                import traceback
+                logger.debug(traceback.format_exc())
+    
+    logger.info(f"Starting Evrmore Authentication API server on {host}:{port}")
+    
+    # Import and run the API
+    from evrmore_authentication.api import app
+    import uvicorn
+    
+    uvicorn.run(
+        app,
+        host=host,
+        port=port,
+        reload=reload,
+        workers=workers,
+        log_level=log_level
+    )
+
 def main():
     """Run the API server with command-line arguments."""
     # Load environment variables from .env file
@@ -40,34 +85,14 @@ def main():
     
     args = parser.parse_args()
     
-    # Set log level
-    log_level = getattr(logging, args.log_level.upper())
-    logging.getLogger().setLevel(log_level)
-    
-    # Initialize the database if not disabled
-    if not args.no_init_db:
-        try:
-            logger.info("Initializing database...")
-            from evrmore_authentication.db import init_db
-            init_db()
-            logger.info("Database initialization complete")
-        except Exception as e:
-            logger.error(f"Error initializing database: {str(e)}")
-            if args.log_level == 'debug':
-                import traceback
-                logger.debug(traceback.format_exc())
-    
-    logger.info(f"Starting Evrmore Authentication API server on {args.host}:{args.port}")
-    
-    # Import and run the API
-    from evrmore_authentication.api import run_api
-    
-    run_api(
+    # Call the API server function with command-line arguments
+    run_api_server(
         host=args.host,
         port=args.port,
         reload=args.reload,
         workers=args.workers,
-        log_level=args.log_level
+        log_level=args.log_level,
+        no_init_db=args.no_init_db
     )
 
 if __name__ == '__main__':

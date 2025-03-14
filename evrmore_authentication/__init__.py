@@ -15,6 +15,8 @@ from logging.handlers import RotatingFileHandler
 __version__ = "1.0.0"
 __author__ = "Manticore Technologies"
 __email__ = "dev@manticore.technology"
+__url__ = "https://github.com/manticoretechnologies/evrmore-authentication"
+__license__ = "MIT"
 
 # Set up logging
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
@@ -35,6 +37,8 @@ logger.setLevel(log_level)
 
 from .auth import EvrmoreAuth, UserSession
 from .models import User, Challenge, Session
+# Import OAuth models
+from .models import OAuthClient, OAuthAuthorizationCode, OAuthToken
 from .crypto import (
     sign_message,
     verify_message,
@@ -66,6 +70,11 @@ __all__ = [
     "Challenge", 
     "Session",
     
+    # OAuth models
+    "OAuthClient",
+    "OAuthAuthorizationCode",
+    "OAuthToken",
+    
     # Crypto functions
     "sign_message",
     "verify_message",
@@ -84,7 +93,7 @@ __all__ = [
     "ConfigurationError",
     
     # FastAPI dependencies
-    "get_current_user",
+    "get_current_user"
 ]
 
 # API function to run the server

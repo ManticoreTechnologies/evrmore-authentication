@@ -24,6 +24,7 @@
   - [Basic Authentication Flow](#basic-authentication-flow)
   - [FastAPI Integration](#fastapi-integration)
   - [Advanced Features](#advanced-features)
+  - [OAuth 2.0 Integration](#oauth-20-integration)
 - [🔧 Debugging & Troubleshooting](#-debugging--troubleshooting)
   - [Debug Mode](#debug-mode)
   - [Database Management](#database-management)
@@ -52,22 +53,21 @@
 
 ## ✨ Overview
 
-Evrmore Authentication is a Python package that provides wallet-based authentication using Evrmore signature verification. This allows users to authenticate to web applications using their Evrmore wallet without sharing their private keys, creating a secure and user-friendly authentication experience.
+The Evrmore Authentication library provides a secure and easy-to-integrate authentication system using Evrmore blockchain wallet signatures. Key features include:
 
-**Key Features:**
-
-- **🔑 Wallet-based authentication** - Users sign a challenge message with their Evrmore wallet
-- **🔒 JWT token management** - Secure session handling with JSON Web Tokens
-- **📁 SQLite backend** - Simple, file-based database for session and challenge storage
-- **👤 Automatic user management** - Users are created on first authentication
-- **🌐 Complete API server** - Ready-to-use FastAPI server for authentication endpoints
-- **🖥️ Demo web interface** - Example Flask application showing the complete authentication flow
-- **🐞 Advanced debugging** - Debug mode and detailed logging for troubleshooting
-- **🧩 Event hooks system** - Customize authentication flow with hooks for key events
-- **⚡ Utility scripts** - Tools for database management and signature verification
-- **🔍 Flexible verification** - Options to skip challenge ownership checks when needed
-- **🧹 Database maintenance** - Automated cleanup for expired challenges and sessions
-- **🔌 Extensibility** - Built-in extension points for building account management systems
+- **Wallet-based Authentication**: Authenticate users via their Evrmore wallet signatures
+- **JWT Token Management**: Automatic JWT token generation and validation
+- **SQLite Backend**: Simple persistent storage with automatic schema creation
+- **Automatic User Management**: Users are created automatically on first authentication
+- **Complete API Server**: Ready-to-use FastAPI server for authentication services
+- **Web Demo**: Browser-based demo application showing the authentication flow
+- **Advanced Debugging**: Debug mode for detailed logging and troubleshooting
+- **Event Hooks System**: Easily extend functionality at key authentication points
+- **Utility Scripts**: Command-line tools for managing the authentication system
+- **Flexible Verification**: Skip ownership verification when needed
+- **Database Maintenance**: Automatic cleanup of expired challenges and tokens
+- **OAuth 2.0 Support**: Complete OAuth 2.0 implementation for third-party applications
+- **Extensibility**: Designed to be extended for custom authentication needs
 
 ## 🚀 Quick Start
 
@@ -246,97 +246,75 @@ address, wif_key = auth.create_wallet_address()
 signature = auth.sign_message(wif_key, message)
 ```
 
+### OAuth 2.0 Integration
+
+Evrmore Authentication includes a full OAuth 2.0 server implementation, allowing you to:
+
+- Register OAuth client applications
+- Implement the OAuth 2.0 Authorization Code flow
+- Get user profile information via OAuth
+- Issue and verify JWT tokens
+- Refresh and revoke tokens
+
+For detailed documentation and step-by-step guides, see:
+
+- [OAuth 2.0 Implementation Guide](OAUTH_GUIDE.md) - Comprehensive guide with setup, flow, troubleshooting, and best practices
+- [FastAPI OAuth Example](evrmore_authentication/examples/fastapi_oauth_example.py) - Complete working example
+
+**Quick Start:**
+
+1. Initialize the database:
+   ```bash
+   python3 -m scripts.db_manage init
+   ```
+
+2. Register an OAuth client:
+   ```bash
+   python3 scripts/register_oauth_client.py register \
+       --name "Your App" --redirects "http://your-app.com/callback"
+   ```
+
+3. Run the authentication server:
+   ```bash
+   python3 -m scripts.run_api_server --port 8001
+   ```
+
+4. Configure your application with the client credentials and implement the OAuth flow.
+
 ## 🔧 Debugging & Troubleshooting
+
+The Evrmore Authentication system includes several debugging tools and features to help diagnose and fix issues.
+
+For detailed troubleshooting information, see the comprehensive [Troubleshooting Guide](TROUBLESHOOTING.md).
 
 ### Debug Mode
 
-Enable detailed logging to troubleshoot authentication issues:
+Enable debug mode in your `.env` file to get more verbose logging:
 
-```python
-# Method 1: Set environment variable
-import os
-os.environ["EVRMORE_AUTH_DEBUG"] = "true"
-
-# Method 2: Pass debug flag when initializing
-auth = EvrmoreAuth(debug=True)
+```
+DEBUG_MODE=True
+LOG_LEVEL=DEBUG
 ```
 
-Debug mode provides detailed logs about:
-- Challenge generation and verification
-- Database operations
-- Signature verification process
-- Error causes and context
+### Debugging Tools
 
-### Database Management
+The repository includes several useful debugging tools:
 
-Use the database management script to inspect and maintain your database:
+- **Database Monitoring**:
+  - `check_db.py` - Check database contents
+  - `check_auth_codes.py` - Monitor OAuth authorization codes in real-time
+  - `check_oauth_clients.py` - Check registered OAuth clients
 
-```bash
-# Show database information
-python3 -m scripts.db_manage info
-
-# List all users
-python3 -m scripts.db_manage list-users
-
-# List challenges for a specific address
-python3 -m scripts.db_manage list-challenges -a "EXaMPLeEvRMoReAddResS"
-
-# List active sessions
-python3 -m scripts.db_manage list-sessions
-
-# Clean up expired records
-python3 -m scripts.db_manage cleanup
-
-# Check database integrity
-python3 -m scripts.db_manage check-integrity --fix
-```
-
-### Signature Verification
-
-The standalone signature verification tool helps debug signature issues:
-
-```bash
-# Verify a signature without database interaction
-python3 -m scripts.verify_signature verify "EXaMPLeEvRMoReAddResS" "message" "signature"
-
-# Generate a challenge string in the same format as the auth system
-python3 -m scripts.verify_signature challenge "EXaMPLeEvRMoReAddResS"
-
-# Generate a signature for testing (requires private key)
-python3 -m scripts.verify_signature sign "private_key_wif" "message"
-```
+- **Log Monitoring**:
+  - `monitor_logs.py` - Real-time monitoring of authentication server logs
 
 ### Common Issues
 
-**Challenge Ownership Errors:**
+For common issues and their solutions, see:
+- [OAuth 2.0 Implementation Guide](OAUTH_GUIDE.md)
+- [Troubleshooting Guide](TROUBLESHOOTING.md)
 
-If you see "Challenge does not belong to this user" errors:
-
-```python
-# Option 1: Skip ownership check during authentication
-session = auth.authenticate(
-    evrmore_address=address,
-    challenge=challenge,
-    signature=signature,
-    skip_ownership_check=True
-)
-
-# Option 2: Reassign the challenge to the correct user
-auth.reassign_challenge(challenge_text, new_address=address)
-```
-
-**Signature Verification Failures:**
-
-If signature verification fails, try:
-
-1. Verify the wallet is signing the exact challenge text
-2. Check if your wallet adds a prefix like "Sign this message: " before signing
-3. Use the verification tool to test signature format
-
-```bash
-# Test signature verification with the exact message format
-python3 -m scripts.verify_signature verify "address" "exact_message" "signature"
-```
+If you encounter persistent issues, please contact support at dev@manticore.technology.
 
 ## 🛠️ Customization
 
@@ -926,4 +904,182 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
   <p>Built with ❤️ by <a href="https://manticore.technology">Manticore Technologies</a></p>
-</div> 
+</div>
+
+## OAuth 2.0 Support
+
+The Evrmore Authentication library includes complete support for OAuth 2.0, allowing you to build secure third-party authentication systems using Evrmore wallet signatures. This enables seamless integration with multiple applications while maintaining a high level of security.
+
+### Key OAuth 2.0 Features
+
+- **Secure Client Registration**: Create and manage OAuth clients with client ID/secret pairs
+- **Authorization Code Flow**: Implement the industry-standard authorization code grant flow
+- **JWT Token Support**: Use both HS256 and RS256 algorithms for token signing
+- **Token Refresh**: Support for refreshing access tokens using refresh tokens
+- **Token Revocation**: Ability to revoke tokens for enhanced security
+- **OpenID Connect Compatible**: Standard userinfo endpoint and token format
+- **HTTPS and CSRF Protection**: Robust security measures against common attacks
+
+### Setting up OAuth 2.0
+
+Add the following environment variables to customize your OAuth 2.0 implementation:
+
+```bash
+# JWT Configuration
+export EVR_AUTH_JWT_ALGORITHM=RS256  # Use RS256 or HS256
+export EVR_AUTH_JWT_PRIVATE_KEY_PATH=/path/to/private_key.pem  # For RS256
+export EVR_AUTH_JWT_PUBLIC_KEY_PATH=/path/to/public_key.pem    # For RS256
+export EVR_AUTH_JWT_SECRET=your-jwt-secret-key                 # For HS256
+export EVR_AUTH_JWT_ISSUER=your-application-name
+export EVR_AUTH_JWT_AUDIENCE=your-api-audience
+export EVR_AUTH_JWT_ACCESS_TOKEN_EXPIRES=3600       # 1 hour in seconds
+export EVR_AUTH_JWT_REFRESH_TOKEN_EXPIRES=2592000   # 30 days in seconds
+```
+
+### OAuth 2.0 Endpoints
+
+The Evrmore Authentication API server includes the following OAuth 2.0 endpoints:
+
+1. **Authorization Endpoint**:  
+   - `POST /oauth/authorize`: Initiates the OAuth 2.0 authorization flow
+   - `GET /oauth/authorize`: Supports browser-based authorization flow
+
+2. **Authentication Endpoint**:  
+   - `POST /oauth/login`: Completes the authentication with a signed challenge
+
+3. **Token Endpoint**:  
+   - `POST /oauth/token`: Exchange authorization code for tokens or refresh tokens
+
+4. **User Information**:  
+   - `GET /oauth/userinfo`: Get user profile information with a valid token
+
+5. **Token Revocation**:  
+   - `POST /oauth/revoke`: Revoke access or refresh tokens
+
+### OAuth 2.0 Flow Example
+
+Here's a high-level overview of the OAuth 2.0 flow:
+
+1. **Register an OAuth client** (one-time setup):
+   ```python
+   from evrmore_authentication import EvrmoreAuth
+   
+   auth = EvrmoreAuth()
+   client = auth.register_oauth_client(
+       client_name="My Application",
+       redirect_uris=["https://myapp.com/callback"],
+       client_uri="https://myapp.com",
+       allowed_response_types=["code"],
+       allowed_scopes=["profile", "email"]
+   )
+   
+   # Store these securely
+   client_id = client.client_id
+   client_secret = client.client_secret
+   ```
+
+2. **Redirect user to authorization endpoint**:
+   ```
+   https://your-auth-server.com/oauth/authorize?
+     client_id=YOUR_CLIENT_ID&
+     redirect_uri=https://myapp.com/callback&
+     response_type=code&
+     scope=profile&
+     state=random_state_for_csrf_protection
+   ```
+
+3. **User signs in with Evrmore wallet**:
+   - User is presented with a challenge
+   - User signs the challenge with their Evrmore wallet
+   - Backend verifies the signature and redirects back to your app with an authorization code
+
+4. **Exchange authorization code for tokens**:
+   ```python
+   import requests
+   
+   response = requests.post(
+       "https://your-auth-server.com/oauth/token",
+       data={
+           "grant_type": "authorization_code",
+           "code": authorization_code,
+           "client_id": client_id,
+           "client_secret": client_secret,
+           "redirect_uri": "https://myapp.com/callback"
+       }
+   )
+   
+   token_data = response.json()
+   access_token = token_data["access_token"]
+   refresh_token = token_data["refresh_token"]
+   expires_in = token_data["expires_in"]
+   ```
+
+5. **Use the access token to get user information**:
+   ```python
+   response = requests.get(
+       "https://your-auth-server.com/oauth/userinfo",
+       headers={"Authorization": f"Bearer {access_token}"}
+   )
+   
+   user_info = response.json()
+   evrmore_address = user_info["address"]
+   user_id = user_info["sub"]
+   ```
+
+6. **Refresh the access token when it expires**:
+   ```python
+   response = requests.post(
+       "https://your-auth-server.com/oauth/token",
+       data={
+           "grant_type": "refresh_token",
+           "refresh_token": refresh_token,
+           "client_id": client_id,
+           "client_secret": client_secret
+       }
+   )
+   
+   new_token_data = response.json()
+   new_access_token = new_token_data["access_token"]
+   new_refresh_token = new_token_data["refresh_token"]
+   ```
+
+7. **Revoke tokens when no longer needed**:
+   ```python
+   response = requests.post(
+       "https://your-auth-server.com/oauth/revoke",
+       data={
+           "token": access_token,
+           "client_id": client_id,
+           "client_secret": client_secret
+       }
+   )
+   ```
+
+### Complete Example
+
+A complete example demonstrating the full OAuth 2.0 flow is available in the `examples/oauth_example.py` file:
+
+```bash
+python3 examples/oauth_example.py
+```
+
+This example demonstrates:
+- Registering an OAuth client
+- Initiating the authorization flow
+- Simulating user sign-in with an Evrmore wallet
+- Exchanging the authorization code for tokens
+- Using the access token to access protected resources
+- Refreshing the access token
+- Revoking the tokens
+
+### Security Considerations
+
+When implementing OAuth 2.0 with Evrmore Authentication:
+
+1. **Always use HTTPS** in production environments
+2. **Validate redirect URIs** to prevent open redirect vulnerabilities
+3. **Use the state parameter** to protect against CSRF attacks
+4. **Keep client secrets secure** and never expose them in client-side code
+5. **Set appropriate token expiration times** based on your security requirements
+6. **Implement proper error handling** to avoid leaking sensitive information
+7. **Use RS256 signatures** for production systems with high security requirements 
