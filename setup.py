@@ -41,6 +41,7 @@ setup(
         "console_scripts": [
             "evrmore-auth-api=scripts.run_api_server:main",
             "evrmore-auth-web=scripts.run_web_demo:main",
+            "evrmore-authentication=evrmore_authentication.bin.cli:main",
         ],
     },
 )
