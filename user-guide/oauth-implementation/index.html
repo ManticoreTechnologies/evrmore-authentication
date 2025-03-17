@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#oauth-20-implementation" class="md-skip">
+        <a href="#evrmore-authentication-oauth-20-implementation-guide" class="md-skip">
           Skip to content
         </a>
       
@@ -521,6 +521,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#table-of-contents" class="md-nav__link">
+    <span class="md-ellipsis">
+      Table of Contents
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#setup-and-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       Setup and Configuration
@@ -665,9 +674,135 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#security-best-practices" class="md-nav__link">
+  <a href="#troubleshooting" class="md-nav__link">
     <span class="md-ellipsis">
-      Security Best Practices
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#invalid-client_id-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      "Invalid client_id" Error
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#missing-or-expired-oauth-session-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      "Missing or expired OAuth session" Error
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authorization-code-exchange-fails-422-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authorization Code Exchange Fails (422 Error)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#failed-to-verify-signature-error" class="md-nav__link">
+    <span class="md-ellipsis">
+      "Failed to verify signature" Error
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugging-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debugging Tools
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-applications" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Applications
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#api-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      API Reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="API Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#oauth-20-endpoints" class="md-nav__link">
+    <span class="md-ellipsis">
+      OAuth 2.0 Endpoints
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#support-and-contact" class="md-nav__link">
+    <span class="md-ellipsis">
+      Support and Contact
     </span>
   </a>
   
@@ -1204,17 +1339,18 @@
   
 
 
-<h1 id="oauth-20-implementation">OAuth 2.0 Implementation<a class="headerlink" href="#oauth-20-implementation" title="Permanent link">&para;</a></h1>
-<p>Evrmore Authentication includes a comprehensive OAuth 2.0 server implementation, allowing your application to function as an identity provider for third-party applications.</p>
+<h1 id="evrmore-authentication-oauth-20-implementation-guide">Evrmore Authentication OAuth 2.0 Implementation Guide<a class="headerlink" href="#evrmore-authentication-oauth-20-implementation-guide" title="Permanent link">&para;</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The OAuth 2.0 implementation supports:</p>
+<p>This guide provides comprehensive documentation for the OAuth 2.0 implementation in Evrmore Authentication. It includes setup instructions, client registration, troubleshooting, and best practices based on real-world experience deploying the system.</p>
+<h2 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Standard Authorization Code flow</li>
-<li>Access and refresh token management</li>
-<li>Scoped permissions</li>
-<li>User info endpoint</li>
-<li>Token revocation</li>
-<li>Client registration and management</li>
+<li><a href="#setup-and-configuration">Setup and Configuration</a></li>
+<li><a href="#client-registration">Client Registration</a></li>
+<li><a href="#oauth-20-flow-implementation">OAuth 2.0 Flow Implementation</a></li>
+<li><a href="#troubleshooting">Troubleshooting</a></li>
+<li><a href="#best-practices">Best Practices</a></li>
+<li><a href="#example-applications">Example Applications</a></li>
+<li><a href="#api-reference">API Reference</a></li>
 </ul>
 <h2 id="setup-and-configuration">Setup and Configuration<a class="headerlink" href="#setup-and-configuration" title="Permanent link">&para;</a></h2>
 <h3 id="database-configuration">Database Configuration<a class="headerlink" href="#database-configuration" title="Permanent link">&para;</a></h3>
@@ -1272,6 +1408,10 @@
 <a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>  Redirect URIs:  http://localhost:8000/callback
 <a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>  Scopes:         profile
 <a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>  Response Types: code
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>To update the OAuth client in your .env file or environment:
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>OAUTH_CLIENT_ID=d5fdcc0c-7a88-4cfc-a1ff-6af04b92e9b0
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>OAUTH_CLIENT_SECRET=XBBMQM9kppmbCyT5opG5FCZ0g89osYeKkrlNrmbIfKk
 </code></pre></div>
 <p>We recommend creating a dedicated <code>.env.oauth</code> file to store these credentials:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a># OAuth Client Credentials
@@ -1400,7 +1540,84 @@
 <a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a>    <span class="n">session</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
 <a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a>    <span class="k">return</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
 </code></pre></div>
-<h2 id="security-best-practices">Security Best Practices<a class="headerlink" href="#security-best-practices" title="Permanent link">&para;</a></h2>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<p>Based on our experience, here are solutions to common OAuth implementation issues:</p>
+<h3 id="invalid-client_id-error">"Invalid client_id" Error<a class="headerlink" href="#invalid-client_id-error" title="Permanent link">&para;</a></h3>
+<p>If you encounter an "Invalid client_id" error:</p>
+<ol>
+<li>
+<p>Verify that the client ID is registered in the database:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>python3<span class="w"> </span>scripts/register_oauth_client.py<span class="w"> </span>list
+</code></pre></div></p>
+</li>
+<li>
+<p>Ensure the database path is consistent between your server and client:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>SQLITE_DB_PATH=./evrmore_authentication/data/evrmore_auth.db
+</code></pre></div></p>
+</li>
+<li>
+<p>Re-register the client if necessary:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>python3<span class="w"> </span>scripts/register_oauth_client.py<span class="w"> </span>register<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">    </span>--name<span class="w"> </span><span class="s2">&quot;Your App&quot;</span><span class="w"> </span>--redirects<span class="w"> </span><span class="s2">&quot;http://your-app.com/callback&quot;</span>
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="missing-or-expired-oauth-session-error">"Missing or expired OAuth session" Error<a class="headerlink" href="#missing-or-expired-oauth-session-error" title="Permanent link">&para;</a></h3>
+<p>This error occurs when the OAuth session cookie is missing or invalid:</p>
+<ol>
+<li>Ensure cookies are properly stored and have appropriate security settings</li>
+<li>Check that the session duration is sufficient</li>
+<li>Verify the state parameter is properly managed</li>
+</ol>
+<h3 id="authorization-code-exchange-fails-422-error">Authorization Code Exchange Fails (422 Error)<a class="headerlink" href="#authorization-code-exchange-fails-422-error" title="Permanent link">&para;</a></h3>
+<p>If token exchange fails with a 422 error:</p>
+<ol>
+<li>
+<p>Ensure the content type is correctly set for the token request:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/x-www-form-urlencoded&quot;</span><span class="p">}</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>Verify that you're sending form data rather than JSON:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a><span class="c1"># Correct:</span>
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a><span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;grant_type&quot;</span><span class="p">:</span> <span class="s2">&quot;authorization_code&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">})</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a><span class="c1"># Incorrect:</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a><span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;grant_type&quot;</span><span class="p">:</span> <span class="s2">&quot;authorization_code&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">})</span>
+</code></pre></div></p>
+</li>
+<li>
+<p>Check that all required parameters are included:</p>
+</li>
+<li><code>grant_type</code></li>
+<li><code>code</code></li>
+<li><code>redirect_uri</code></li>
+<li><code>client_id</code></li>
+<li><code>client_secret</code></li>
+</ol>
+<h3 id="failed-to-verify-signature-error">"Failed to verify signature" Error<a class="headerlink" href="#failed-to-verify-signature-error" title="Permanent link">&para;</a></h3>
+<p>If signature verification fails:</p>
+<ol>
+<li>Ensure the user is signing the exact challenge text provided</li>
+<li>Check that the signature and Evrmore address match</li>
+<li>Make sure you're using the correct verification order in any custom code</li>
+</ol>
+<h3 id="debugging-tools">Debugging Tools<a class="headerlink" href="#debugging-tools" title="Permanent link">&para;</a></h3>
+<p>The repository includes two useful debugging tools:</p>
+<ol>
+<li>
+<p><strong>monitor_logs.py</strong> - Real-time log monitoring:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>python3<span class="w"> </span>monitor_logs.py
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>check_auth_codes.py</strong> - Monitor OAuth authorization codes:
+   <div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>python3<span class="w"> </span>check_auth_codes.py
+</code></pre></div></p>
+</li>
+</ol>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="security">Security<a class="headerlink" href="#security" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>Use HTTPS</strong> in production environments</li>
 <li><strong>Set secure cookie attributes</strong>:</li>
@@ -1417,7 +1634,38 @@
 <li><strong>Use refresh tokens</strong> for longer sessions rather than extending access token lifetimes</li>
 <li><strong>Revoke tokens</strong> when users log out</li>
 </ol>
-<p>For full example implementations, see the <a href="../../examples/oauth-client/">FastAPI OAuth Example</a> in the Examples section. </p>
+<h3 id="implementation">Implementation<a class="headerlink" href="#implementation" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Separate OAuth configuration</strong> into a dedicated file (like <code>.env.oauth</code>)</li>
+<li><strong>Implement token refresh logic</strong> to handle expired tokens gracefully</li>
+<li><strong>Add proper logging</strong> for debugging</li>
+<li><strong>Handle errors gracefully</strong> with user-friendly messages</li>
+<li><strong>Validate all inputs</strong> before sending requests</li>
+</ol>
+<h2 id="example-applications">Example Applications<a class="headerlink" href="#example-applications" title="Permanent link">&para;</a></h2>
+<p>The repository includes example applications:</p>
+<ol>
+<li><strong>fastapi_oauth_example.py</strong> - A complete FastAPI web application demonstrating the OAuth flow</li>
+</ol>
+<p>Run the FastAPI example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>python3<span class="w"> </span>evrmore_authentication/examples/fastapi_oauth_example.py
+</code></pre></div>
+<p>Then visit http://localhost:8000 in your browser.</p>
+<h2 id="api-reference">API Reference<a class="headerlink" href="#api-reference" title="Permanent link">&para;</a></h2>
+<h3 id="oauth-20-endpoints">OAuth 2.0 Endpoints<a class="headerlink" href="#oauth-20-endpoints" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>POST /oauth/clients</strong> - Register a new OAuth client</li>
+<li><strong>GET/POST /oauth/authorize</strong> - Start the authorization process</li>
+<li><strong>POST /oauth/token</strong> - Exchange authorization codes or refresh tokens</li>
+<li><strong>GET /oauth/userinfo</strong> - Get the authenticated user's profile</li>
+<li><strong>POST /oauth/revoke</strong> - Revoke tokens</li>
+<li><strong>GET /auth</strong> - HTML authentication page for the OAuth flow</li>
+</ul>
+<p>For detailed API documentation, see the FastAPI automatic docs at <code>/docs</code> when the server is running.</p>
+<h2 id="support-and-contact">Support and Contact<a class="headerlink" href="#support-and-contact" title="Permanent link">&para;</a></h2>
+<p>If you encounter issues or have questions, please contact:
+- Email: dev@manticore.technology
+- GitHub: https://github.com/manticoretechnologies </p>
 
 
 
